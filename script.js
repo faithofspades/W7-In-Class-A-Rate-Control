@@ -3,19 +3,16 @@ const myAudioCtx = new AudioContext();
 
 //make oscillator node
 let myOsc = myAudioCtx.createOscillator();
-myOsc.frequency.value = 0;
+myOsc.frequency.value = 600;
 
-//make carrier source
-let carrier = myAudioCtx.createConstantSource();
-carrier.offset.value = 300;
 
 //make modulation oscillator
 let modOsc = myAudioCtx.createOscillator();
-modOsc.frequency.value = 200;
+modOsc.frequency.value = 0.1;
 
 //modulation depth
 let modDepth = myAudioCtx.createGain();
-modDepth.gain.value = 100;
+modDepth.gain.value = 0.2;
 
 //make gain node
 let myGain = myAudioCtx.createGain();
@@ -27,21 +24,70 @@ myOsc.connect(myGain);
 //connect modulation to depth
 modOsc.connect(modDepth);
 
-//connect carrier to freq
-carrier.connect(myOsc.frequency);
-
-//connect modulation depth to frequency
-modDepth.connect(myOsc.frequency);
-
 //connect gain to destination
 myGain.connect(myAudioCtx.destination);
+
+//create delay line
+let delay = myAudioCtx.createDelay();
+delay.delayTime.value = 0.25;
+
+//create feedback
+let feedback = myAudioCtx.createGain();
+feedback.gain.value = 0.05;
+
+//connect delay to feedback
+
+delay.connect(feedback);
+
+//connect feedback to delay
+feedback.connect(delay);
+
+//connect gain to delay
+myGain.connect(delay);
+
+//connect delay to destination
+delay.connect(myAudioCtx.destination);
+
+//center delay time
+let delayTime = myAudioCtx.createConstantSource();
+delayTime.offset.value = 0.5;
+
+delayTime.connect(delay.delayTime);
+
+//frequency modulation
+modDepth.connect(delay.delayTime);
 
 //start oscillator
 const startAudio = function() {
   myAudioCtx.resume();
   myOsc.start()
   modOsc.start()
-  carrier.start();};
+  delayTime.start();};
+
 //Add event listener to button
 let myButton = document.getElementById('startAudio');
 myButton.addEventListener('click', startAudio);
+
+//add event listener to mod depth slider
+let modDepthSlider = document.getElementById('modDepth');
+modDepthSlider.addEventListener('input', function() {
+  modDepth.gain.value = modDepthSlider.value;
+});
+
+//add event listener to mod frequency slider
+let modFreqSlider = document.getElementById('modFreq');
+modFreqSlider.addEventListener('input', function() {
+  modOsc.frequency.value = modFreqSlider.value;
+});
+
+//add event listener to delay time slider
+let delayTimeSlider = document.getElementById('delayTime');
+delayTimeSlider.addEventListener('input', function() {
+  delayTime.offset.value = delayTimeSlider.value;
+});
+
+//add event listener to delay feedback slider
+let feedbackSlider = document.getElementById('feedback');
+feedbackSlider.addEventListener('input', function() {
+  feedback.gain.value = feedbackSlider.value;
+});
