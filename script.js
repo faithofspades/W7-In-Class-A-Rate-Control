@@ -1,10 +1,25 @@
 //create an audio context (an audio graph)
 const myAudioCtx = new AudioContext();
 
+
+// //add mic input 
+// navigator.mediaDevices.getUserMedia({audio: true})
+//   .then(function(stream) {
+//     let myMic = myAudioCtx.createMediaStreamSource(stream);
+//     myMic.connect(myAudioCtx.destination);
+//   });
+
+// //create a gain node
+// let myGain2 = myAudioCtx.createGain();
+// myGain2.gain.value = 1;
+// //connect gain node to destination
+// myGain2.connect(myAudioCtx.destination);
+// //connect mic to gain node
+// myMic.connect(myGain2);
+
 //make oscillator node
 let myOsc = myAudioCtx.createOscillator();
 myOsc.frequency.value = 600;
-
 
 //make modulation oscillator
 let modOsc = myAudioCtx.createOscillator();
@@ -35,18 +50,8 @@ delay.delayTime.value = 0.25;
 let feedback = myAudioCtx.createGain();
 feedback.gain.value = 0.05;
 
-//connect delay to feedback
-
-delay.connect(feedback);
-
-//connect feedback to delay
-feedback.connect(delay);
-
 //connect gain to delay
-myGain.connect(delay);
-
-//connect delay to destination
-delay.connect(myAudioCtx.destination);
+myGain.connect(delay); 
 
 //center delay time
 let delayTime = myAudioCtx.createConstantSource();
@@ -56,6 +61,16 @@ delayTime.connect(delay.delayTime);
 
 //frequency modulation
 modDepth.connect(delay.delayTime);
+
+//connect delay to destination
+delay.connect(myAudioCtx.destination);
+
+//connect delay to feedback
+
+delay.connect(feedback);
+
+//connect feedback to delay
+feedback.connect(delay);
 
 //start oscillator
 const startAudio = function() {
